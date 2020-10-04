@@ -3,6 +3,9 @@ import 'package:chewie_audio/src/chewie_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChewieAudioDemo extends StatefulWidget {
   ChewieAudioDemo(
@@ -90,80 +93,45 @@ class _ChewieDemoState extends State<ChewieAudioDemo> {
                 controller: _chewieAudioController,
               ),
             ),
-            // Row(
-            //   children: <Widget>[
-            //     Expanded(
-            //       child: FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _chewieAudioController.dispose();
-            //             _videoPlayerController2.pause();
-            //             _videoPlayerController2.seekTo(Duration(seconds: 0));
-            //             _chewieAudioController = ChewieAudioController(
-            //               videoPlayerController: _videoPlayerController1,
-            //               autoPlay: true,
-            //               looping: true,
-            //             );
-            //           });
-            //         },
-            //         child: Padding(
-            //           child: Text("Video 1"),
-            //           padding: EdgeInsets.symmetric(vertical: 16.0),
-            //         ),
-            //       ),
-            //     ),
-            //     Expanded(
-            //       child: FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _chewieAudioController.dispose();
-            //             _videoPlayerController1.pause();
-            //             _videoPlayerController1.seekTo(Duration(seconds: 0));
-            //             _chewieAudioController = ChewieAudioController(
-            //               videoPlayerController: _videoPlayerController2,
-            //               autoPlay: true,
-            //               looping: true,
-            //             );
-            //           });
-            //         },
-            //         child: Padding(
-            //           padding: EdgeInsets.symmetric(vertical: 16.0),
-            //           child: Text("Error Video"),
-            //         ),
-            //       ),
-            //     )
-            //   ],
-            // ),
-            // Row(
-            //   children: <Widget>[
-            //     Expanded(
-            //       child: FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _platform = TargetPlatform.android;
-            //           });
-            //         },
-            //         child: Padding(
-            //           child: Text("Android controls"),
-            //           padding: EdgeInsets.symmetric(vertical: 16.0),
-            //         ),
-            //       ),
-            //     ),
-            //     Expanded(
-            //       child: FlatButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _platform = TargetPlatform.iOS;
-            //           });
-            //         },
-            //         child: Padding(
-            //           padding: EdgeInsets.symmetric(vertical: 16.0),
-            //           child: Text("iOS controls"),
-            //         ),
-            //       ),
-            //     )
-            //   ],
-            // )
+            RaisedButton(
+              color: Colors.cyan,
+              child: Text("Download Song!"),
+              onPressed: () async {
+                final status = await Permission.storage.request();
+
+                if (status.isGranted) {
+                  final externalDir = await getExternalStorageDirectory();
+
+                  final id = await FlutterDownloader.enqueue(
+                    url: widget.url,
+                    savedDir: externalDir.path,
+                    fileName: widget.tit + ".mp4",
+                    showNotification: true,
+                    openFileFromNotification: true,
+                  );
+                  if (id != null) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        duration: Duration(
+                          seconds: 3,
+                          milliseconds: 500,
+                        ),
+                        content: Text(
+                          "Download Completed\nFile saved at android/data/com.eduapp",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        backgroundColor: Colors.teal[100],
+                      ),
+                    );
+                  }
+                } else {
+                  print("hello");
+                }
+              },
+            )
           ],
         ),
       ),

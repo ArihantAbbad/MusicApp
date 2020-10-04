@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:music_app/playPage.dart';
-
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'Welcome';
   @override
@@ -11,9 +11,41 @@ class WelcomeScreen extends StatefulWidget {
 
 class _State extends State<WelcomeScreen> {
   TextEditingController nameController = TextEditingController();
+  bool _saving = false;
   String query;
 
+
+  //@override
+//  void initState() async {
+//
+//    super.initState();
+//    var multisongURL = 'https://www.jiosaavn.com/api.php?__call=webradio.getSong&stationid=ViJK7H0SzH3DQw5AXAF7U3EeY-Mp6UMpKwzeMURwYi2cMHuO1wQB-A__&k=5&next=1&api_version=4&_format=json&_marker=0&ctx=wap6dot0';
+//    try {
+//      var response = await http.get(multisongURL);
+//      if (response.statusCode == 200) {
+//        var jsonResponse = jsonDecode(response.body);
+//        for(var i=0;i<4;i++) {
+//          var en_id = jsonResponse['$i']['song']['more_info']['encrypted_media_url'];
+//
+//          print('$en_id');
+//          en_id = en_id.replaceAll('+', '%2B');
+//          en_id = en_id.replaceAll('/', '%2F');
+//          print('$en_id');
+//          getNO(en_id);
+//        }
+//      } else {
+//        print('Request failed with status: ${response.statusCode}.');
+//      }
+//    } catch (e) {
+//      print(e);
+//    }
+//  }
+
   void getFinalUrl(no_id) async {
+    setState(() {
+      _saving = false;
+      nameController.clear();
+    });
     var finalURL =
         'https://sklktecdnems05.cdnsrv.jio.com/jiosaavn.cdn.jio.com/$no_id';
     Navigator.push(
@@ -86,6 +118,7 @@ class _State extends State<WelcomeScreen> {
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
         var image = jsonResponse['songs']['data'][0]['image'];
+        image = image.replaceAll('50x50','500x500');
         imgUrl = image;
         var title = jsonResponse['songs']['data'][0]['title'];
         titlee = title;
@@ -106,71 +139,79 @@ class _State extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Color(0xFF4F4F4F),
-        body: Padding(
-            padding: EdgeInsets.all(10),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    onChanged: (value) {
-                      query = value;
-                    },
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                    textAlign: TextAlign.start,
-                    decoration: InputDecoration(
-                      border: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                        color: Colors.white70,
-                      )),
-                      hintText: 'Search',
-                      prefixIcon:
-                          Icon(Icons.search, color: Colors.white, size: 25),
-                    ),
-                  ), //textfield
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () async {
-                      getToken();
-                      //do 1st 2 steps
-                    },
-                    child: Container(
-                      height: 40,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
+    return ModalProgressHUD(
+      inAsyncCall: _saving,
+      child: Scaffold(
+          backgroundColor: Color(0xFF4F4F4F),
+          body: Padding(
+              padding: EdgeInsets.all(10),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: nameController,
+                      onChanged: (value) {
+                        query = value;
+                      },
+                      style: TextStyle(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
+                        fontSize: 20,
                       ),
-                      child: Text(
-                        'SEARCH',
-                        style: TextStyle(color: Colors.black87),
+                      textAlign: TextAlign.start,
+                      decoration: InputDecoration(
+                        border: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                          color: Colors.white70,
+                        )),
+                        hintText: 'Search',
+                        prefixIcon:
+                            Icon(Icons.search, color: Colors.white, size: 25),
                       ),
-                    ),
-                  ), //gesturedetector
+                    ), //textfield
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () async {
+                        setState(() {
+                          _saving = true;
+                        });
+
+                        getToken();
+
+                        //do 1st 2 steps
+                      },
+                      child: Container(
+                        height: 40,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          'SEARCH',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    ), //gesturedetector
 //                 GestureDetector(
-                  // child:
+                    // child:
 
-                  SizedBox(height: 60),
-                  // ),
-                  Container(
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(10),
-                    child: Image(
-                      width: 400,
-                      height: 400,
-                      image: NetworkImage(
-                          'https://github.com/ArihantAbbad/EDU_APP/blob/master/assets/images/headphone%20(1).jpg?raw=true'),
+                    SizedBox(height: 60),
+                    // ),
+                    Container(
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.all(10),
+                      child: Image(
+                        width: 400,
+                        height: 400,
+                        image: NetworkImage('https://www.blhsnews.com/wp-content/uploads/2018/11/apple-music-note-800x420.jpg'),
+                      ),
                     ),
-                  ),
 
-                  //SizedBox(height:10),
-                ],
-              ),
-            )));
+                    //SizedBox(height:10),
+                  ],
+                ),
+              ))),
+    );
   }
 }
