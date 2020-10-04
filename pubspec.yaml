@@ -30,6 +30,10 @@ dependencies:
   cupertino_icons: ^0.1.3
   http: ^0.12.2
   chewie_audio: ^1.0.0+1
+  modal_progress_hud: ^0.1.3
+  flutter_downloader: ^1.5.1
+  path_provider: ^1.6.14
+  permission_handler: ^5.0.1+1
 
 dev_dependencies:
   flutter_test:
