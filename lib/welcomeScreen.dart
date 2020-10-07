@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,6 +11,7 @@ import 'songList.dart';
 import 'package:music_app/textfield.dart';
 import 'package:highlight_text/highlight_text.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:music_app/shared.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'Welcome';
@@ -132,19 +134,42 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   List randomSongs;
-  List randomSongs1;
+  List songTitles = [];
+  //------------------------------------------------------------------------------------------------------------------------------
+
   @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
     getRandomSongs();
+    getShared();
+  }
+
+  //------------------------------------------------------------------------------------------------------------------------------
+  List songDesc = [];
+  List<List> finalRecentSongs = [];
+  getShared() async {
+    // TrendingSongs trendingSongs = TrendingSongs();
+    // trendingSongs.getTrendingSongs();
+
+    MySharedPreferences mySharedPreferences = MySharedPreferences.instance;
+    songTitles = await mySharedPreferences.getListData('rname');
+    print(songTitles);
+    if (songTitles != null) {
+      for (var i = 0; i < songTitles.length; i++) {
+        songDesc = await mySharedPreferences.getListData(songTitles[i]);
+        finalRecentSongs.add(songDesc);
+      }
+      print(finalRecentSongs);
+      setState(() {});
+    }
   }
 
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) async {
-          //========================================================================
+          //====================================================================
           if (val == 'notListening') {
             if (_text != null &&
                 _text != 'Press the button and start speaking') {
@@ -164,7 +189,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 _isListening = false;
               });
             }
-            //========================================================================
+            //==================================================================
             setState(() {
               _isListening = false;
             });
@@ -194,8 +219,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   void getRandomSongs() async {
     RandomSong randomSong = RandomSong();
     randomSongs = await randomSong.getTokenforRandomSong();
-    randomSongs1 = await randomSong.getTokenforRandomSong();
-    abc = randomSongs1.sublist(6);
     setState(() {});
   }
 
@@ -372,7 +395,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             height: 40,
                           ),
                           finalURL == null
-                              ? abc == null
+                              ? finalRecentSongs.length == 0
                                   ? SizedBox(
                                       width: 5,
                                     )
@@ -386,17 +409,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                                   shrinkWrap: true,
                                                   scrollDirection:
                                                       Axis.horizontal,
-                                                  itemCount: abc.length,
+                                                  itemCount:
+                                                      finalRecentSongs.length,
                                                   itemBuilder:
                                                       (context, index) {
                                                     return Row(
                                                       children: <Widget>[
                                                         HoriList(
-                                                            imgpath: abc[index]
-                                                                [0],
-                                                            title: abc[index]
-                                                                [1],
-                                                            url: abc[index][2]),
+                                                          imgpath:
+                                                              finalRecentSongs[
+                                                                  index][1],
+                                                          title:
+                                                              finalRecentSongs[
+                                                                  index][0],
+                                                          url: finalRecentSongs[
+                                                              index][2],
+                                                          singer:
+                                                              finalRecentSongs[
+                                                                  index][3],
+                                                        ),
                                                         SizedBox(
                                                           width: 8,
                                                         ),

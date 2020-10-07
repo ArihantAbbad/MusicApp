@@ -6,6 +6,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
+import 'package:music_app/shared.dart';
 
 class YellowBird extends StatefulWidget {
   YellowBird(
@@ -50,11 +51,28 @@ class _YellowBirdState extends State<YellowBird> {
     super.dispose();
   }
 
+  List<String> songNames = [];
   bool pressed = false;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            MySharedPreferences mySharedPreferences =
+                MySharedPreferences.instance;
+            songNames = await mySharedPreferences.getListData('rname');
+            if (songNames == null) {
+              await mySharedPreferences.setListData('rname', ['${widget.tit}']);
+            } else {
+              songNames.add('${widget.tit}');
+              await mySharedPreferences.setListData('rname', songNames);
+            }
+            await mySharedPreferences.setListData('${widget.tit}',
+                [widget.tit, widget.imgPath, widget.url, widget.singer]);
+          },
+          child: Icon(Icons.add),
+        ),
         backgroundColor: Color(0xFF24263D),
         body: SingleChildScrollView(
           child: Column(
@@ -227,43 +245,3 @@ class _YellowBirdState extends State<YellowBird> {
     ); //scaff
   }
 }
-
-// RaisedButton(
-//   color: Colors.cyan,
-//   child: Text("Download Song!"),
-//   onPressed: () async {
-//     final status = await Permission.storage.request();
-//
-//     if (status.isGranted) {
-//       final externalDir = await getExternalStorageDirectory();
-//
-//       final id = await FlutterDownloader.enqueue(
-//         url: widget.url,
-//         savedDir: externalDir.path,
-//         fileName: widget.tit + ".mp4",
-//         showNotification: true,
-//         openFileFromNotification: true,
-//       );
-//       if (id != null) {
-//         Scaffold.of(context).showSnackBar(
-//           SnackBar(
-//             duration: Duration(
-//               seconds: 3,
-//               milliseconds: 500,
-//             ),
-//             content: Text(
-//               "Download Completed\nFile saved at android/data/com.eduapp",
-//               style: TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 fontSize: 15,
-//               ),
-//             ),
-//             backgroundColor: Colors.teal[100],
-//           ),
-//         );
-//       }
-//     } else {
-//       print("hello");
-//     }
-//   },
-// )
